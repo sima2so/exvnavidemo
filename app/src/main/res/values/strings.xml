@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">navi</string>
+    <string name="yAxis_name_label">State of Charge [%]</string>
+    <string name="xAxis_name_label">Crusing Range [km]</string>
+    <string name="text_message">ああああ</string>
+    <string name="text_message_cat">にゃーにゃー!</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

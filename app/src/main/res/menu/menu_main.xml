@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.hoge.fuga.MainActivity">
+<!--    　　　　　　　&lt;!&ndash; ↑ここでどのActivityと結びついているか指定する &ndash;&gt;-->
+<!--    <item-->
+<!--        android:id="@+id/action_settings"-->
+<!--        android:orderInCategory="100"-->
+<!--        android:title="tttttttttt"-->
+<!--        app:showAsAction="never" />-->
+</menu>

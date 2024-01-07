@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_navi"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.navi.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_inputGoalSearchWordFragment"
+            app:destination="@id/inputGoalSearchWordFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_setCofigRoutePlanFragment"
+            app:destination="@id/setCofigRoutePlanFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_naviActivity"
+            app:destination="@id/naviActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/inputGoalSearchWordFragment"
+        android:name="com.example.navi.InputGoalSearchWordFragment"
+        android:label="fragment_input_goal_search_word"
+        tools:layout="@layout/fragment_input_goal_search_word" >
+        <action
+            android:id="@+id/action_inputGoalSearchWordFragment_to_showGoalSearchResultFragment"
+            app:destination="@id/showSearchGoalResultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/showSearchGoalResultFragment"
+        android:name="com.example.navi.ShowSearchGoalResultFragment"
+        android:label="fragment_show_search_goal_result"
+        tools:layout="@layout/fragment_show_search_goal_result" >
+        <argument
+            android:name="goalSearchWord"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_showSearchGoalResultFragment_to_setCofigRoutePlanFragment"
+            app:destination="@id/setCofigRoutePlanFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/setCofigRoutePlanFragment"
+        android:name="com.example.navi.SetCofigRoutePlanFragment"
+        android:label="fragment_set_cofig_route_plan"
+        tools:layout="@layout/fragment_set_cofig_route_plan" >
+        <argument
+            android:name="selectedGoalItem"
+            app:argType="com.example.navi.Item" />
+        <action
+            android:id="@+id/action_setCofigRoutePlanFragment_to_showRoutePlanFragment"
+            app:destination="@id/showRoutePlan" />
+    </fragment>
+    <fragment
+        android:id="@+id/showRoutePlan"
+        android:name="com.example.navi.ShowRoutePlanFragment"
+        android:label="fragment_show_route_plan"
+        tools:layout="@layout/fragment_show_route_plan" >
+        <argument
+            android:name="naviRouteData"
+            app:argType="com.example.navi.NaviRouteData" />
+    </fragment>
+    <activity
+        android:id="@+id/naviActivity"
+        android:name="com.example.navi.NaviActivity"
+        android:label="fragment_navi"
+        tools:layout="@layout/fragment_navi_with_energygraph" />
+</navigation>
