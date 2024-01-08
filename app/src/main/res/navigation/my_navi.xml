@@ -17,8 +17,8 @@
             android:id="@+id/action_homeFragment_to_setCofigRoutePlanFragment"
             app:destination="@id/setCofigRoutePlanFragment" />
         <action
-            android:id="@+id/action_homeFragment_to_naviActivity"
-            app:destination="@id/naviActivity" />
+            android:id="@+id/action_homeFragment_to_naviWithEnergyGraphActivity"
+            app:destination="@id/naviWithEnergyGraphActivity.kt" />
     </fragment>
     <fragment
         android:id="@+id/inputGoalSearchWordFragment"
@@ -63,8 +63,8 @@
             app:argType="com.example.navi.NaviRouteData" />
     </fragment>
     <activity
-        android:id="@+id/naviActivity"
-        android:name="com.example.navi.NaviActivity"
-        android:label="fragment_navi"
-        tools:layout="@layout/fragment_navi_with_energygraph" />
+        android:id="@+id/naviWithEnergyGraphActivity.kt"
+        android:name="com.example.navi.NaviWithEnergyGraphActivity"
+        android:label="activity_navi_with_energygraph"
+        tools:layout="@layout/activity_navi_with_energygraph" />
 </navigation>

@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NaviActivity">
+            android:name=".NaviWithEnergyGraphActivity">
         </activity>
         <activity
             android:name=".SearchGoalActivity">

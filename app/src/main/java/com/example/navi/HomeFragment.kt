@@ -1,5 +1,6 @@
 package com.example.navi
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,7 +59,9 @@ class HomeFragment : Fragment() {
 
         button_StartNavi.setOnClickListener {
 //            val selectedGoalItem = Item(null,null,null,null,null,null,null,null,null,null,null)
-//            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToSetCofigRoutePlanFragment(selectedGoalItem))
+            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToNaviWithEnergyGraphActivity())
+//            val intent = Intent(this,NaviWithEnergyGraphActivity::class.java)
+//            startActivity(intent)
         }
 
         return view

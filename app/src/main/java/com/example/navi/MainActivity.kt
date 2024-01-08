@@ -23,10 +23,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
 //        val buttonSetRoute = findViewById<Button>(R.id.button_SetRoute)
 ////        val buttonStartNavi = findViewById<Button>(R.id.button_StartNavi)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar);
 //        //ここから遷移用のコード
 //        buttonSetRoute.setOnClickListener{
 //            val intent = Intent(this,SearchGoalActivity::class.java)
