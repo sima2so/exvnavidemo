@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript">
+        var script = document.createElement('script');
+        script.src = Android_itsumoNaviApiClient.gen_itumonavi_JSAPI_loader_url();
+        document.head.appendChild(script);
+    </script>
+
+    <script type="text/javascript">
+
+    var map, from, to, msg_info,
+    lat = 35.6778614, lon = 139.7703167, imgdir ='./';
+
+    var line_property = {
+        '高速道路': {strokeColor: '#3000ff', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '都市高速道路': {strokeColor: '#008E00', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '国道': {strokeColor: '#007777', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '主要地方道': {strokeColor: '#880000', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '都道府県道': {strokeColor: '#008800', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '一般道路(幹線)': {strokeColor: '#000088', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '一般道路(その他)': {strokeColor: '#880000', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '導入路': {strokeColor: '#880000', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        '細街路(主要)': {strokeColor: '#880000', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'},
+        'フェリー航路': {},
+        '道路外': {strokeColor: '#880000', strokeWeight: 5, lineOpacity: 0.5, lineStyle: 'solid'}
+    };
+
+    function loadMap(){
+        var ll  = new ZDC.LatLon(lat, lon);
+        map = new ZDC.Map(document.getElementById('ZMap'),{
+            latlon: ll,
+            mapType: ZDC.MAPTYPE_HIGHRES_LV18,
+            zoom: 5
+        });
+
+        msg_info = new ZDC.MsgInfo(ll, {offset: ZDC.Pixel(0, -18)});
+        map.addWidget(msg_info);
+        map.addWidget(new ZDC.ScaleBar());
+        map.addWidget(new ZDC.Control());
+    };
+
+    function exec(){
+        /* スタート地点の緯度経度 */
+        from = new ZDC.LatLon(35.6806275, 139.8015336);
+        /* ゴール地点の緯度経度 */
+        to   = new ZDC.LatLon(35.6659792, 139.74036);
+
+        const route3_params_json = Android_itsumoNaviApiClientJS.gen_itumonavi_JSAPI_route3_params();
+        const route3_params = JSON.parse(route3_params_json);
+
+        /* 自動車ルート検索を実行 */
+        ZDC.Search.getByZmaps('route3/drive',
+            route3_params,function(status, res) {
+            if (status.code == '200' && res.status.code === '0000') {
+                /* 取得成功 */
+<!--                document.getElementById("ZMap").innerHTML = '<br><br>' + status.text + '<br>' + res.route.distance + '<br>' + route3_params;-->
+                writeRoute(status, res);
+            } else {
+                /* 取得失敗 */
+                document.getElementById("ZMap").innerHTML =
+                status.text
+                 + '<br>' + route3_params['if_clientid']
+                 + '<br>' + route3_params['if_auth_type']
+                 + '<br>' + route3_params['oauth_consumer_key']
+                 + '<br>' + route3_params['oauth_signature_method']
+                 + '<br>' + route3_params['oauth_timestamp']
+                 + '<br>' + route3_params['oauth_nonce']
+                 + '<br>' + route3_params['oauth_version']
+                 + '<br>' + route3_params['from']
+                 + '<br>' + route3_params['to']
+                 + '<br>' + route3_params['searchType']
+                 + '<br>' + route3_params['oauth_signature']
+                 ;
+            }
+    	});
+    };
+
+    function writeRoute(status, res) {
+        var guide_type =
+        {
+            'start': {
+                custom: {
+                    base: {
+                        src: imgdir + 'route_bg.png',
+                        imgSize: new ZDC.WH(35, 35),
+                        imgTL: new ZDC.TL(0, 0)
+                    },
+                    content: {
+                        src: imgdir + 'route_cat.png',
+                        imgSize: new ZDC.WH(35, 35),
+                        imgTL: new ZDC.TL(0, 0)
+                    }
+                },
+                offset: ZDC.Pixel(0, -36)
+            },
+            'end': {
+                custom: {
+                    base: {
+                        src: imgdir + 'route_bg.png',
+                        imgSize: new ZDC.WH(35, 35),
+                        imgTL: new ZDC.TL(38, 0)
+                    },
+                    content: {
+                        src: imgdir + 'route_cat.png',
+                        imgSize: new ZDC.WH(35, 35),
+                        imgTL: new ZDC.TL(35, 0)
+                    }
+                },
+                offset: ZDC.Pixel(0, -36)
+            }
+        };
+
+        /* スタートとゴールのアイコンを地図に重畳します */
+        var start = new ZDC.Marker(from,guide_type['start']);
+        var end   = new ZDC.Marker(to,guide_type['end']);
+
+        /*
+         スタートとゴールのウィジットが他のマーカの
+         下にならないようにz-indexを設定します
+        */
+        start.setZindex(110);
+        end.setZindex(110);
+
+        map.addWidget(start);
+        map.addWidget(end);
+
+        var link = res.route.link;
+
+        var latlons = [];
+
+        for (var i=0, j=link.length; i<j; i++) {
+
+            var opt = line_property[link[i].roadType];
+            var pllatlons =[];
+
+            for (var k=0, l=link[i].line.latlon.length; k<l; k+=2) {
+                pllatlons.push(new ZDC.LatLon(link[i].line.latlon[k],link[i].line.latlon[k+1]));
+
+                /* getAdjustZoom用に全地点の緯度経度を取得 */
+                latlons.push(new ZDC.LatLon(link[i].line.latlon[k],link[i].line.latlon[k+1]));
+
+            }
+            var pl = new ZDC.Polyline(pllatlons, opt);
+            map.addWidget(pl);
+
+            if (link[i].guidance != null) {
+                /* 誘導画像情報 */
+                var url = link[i].guidance.imageurl;
+                if (url.length != 0) {
+                    var mk = new ZDC.Marker(new ZDC.LatLon(link[i].line.latlon[0],link[i].line.latlon[1]));
+                    map.addWidget(mk);
+
+                    /* マーカをクリックしたときの動作 */
+                    ZDC.bind(mk, ZDC.MARKER_CLICK, {link: link[i]}, markerClick);
+                }
+            }
+        }
+
+        /* 地点が全て表示できる縮尺レベルを取得 */
+        var adjust = map.getAdjustZoom(latlons);
+        map.moveLatLon(adjust.latlon);
+        map.setZoom(adjust.zoom);
+    };
+
+    function markerClick() {
+
+        var url = this.link.guidance.imageurl[0].url;
+        var road_name  = this.link.guidance.routeName;
+        var cross_name = this.link.guidance.pointName;
+
+        if (road_name == null) {
+            road_name = 'なし';
+        }
+        if (cross_name == null) {
+            cross_name = 'なし';
+        }
+
+        var html = '<div style = "width:200px; height:170px; overflow-y:scroll;">';
+        html += '<img src="' + url + '" width="100%"></src>';
+        html += '<table border="1" style="width:180px;">';
+        html += '<tr>';
+        html += '<td width="35%" style="font-size:10pt;">道路名</td>';
+        html += '<td style="font-size:10pt;">'+ road_name +'</td>';
+        html += '</tr>';
+        html += '<tr>';
+        html += '<td style="font-size:10pt;">交差点名</td>';
+        html += '<td style="font-size:10pt;">'+ cross_name +'</td>';
+        html += '</tr></table></div>';
+        msg_info.setHtml(html);
+        msg_info.moveLatLon(new ZDC.LatLon(this.link.line.latlon[0], this.link.line.latlon[1]));
+        msg_info.open();
+    };
+
+</script>
+</head>
+
+<body onload="loadMap();exec();">
+<div id="ZMap" style="border:1px solid #777777; width:400px; height:400px; top:0px; left:0px; position:absolute;"></div>
+<div id="IBox" style="top:20px; left:100px; position:absolute;">
+    <input type="button" value="自動車ルート検索" onclick="exec();">
+</div>
+<!--<script type="text/javascript">-->
+<!--    document.getElementById("ZMap").innerHTML = result;-->
+<!--</script>-->
+</body>
+</html>

@@ -1,14 +1,23 @@
 package com.example.navi
 
 import android.util.Log
+import android.webkit.JavascriptInterface
+import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
 import java.net.URLEncoder
 import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import kotlin.reflect.jvm.internal.impl.builtins.StandardNames.FqNames.map
+
 
 class ItsumoNaviApiClient() {
+    private val consumer_key = "JSZ22f5fd2f67d9|2UcW0"
+    private val secret = "5th-fmKSlNWGvB_cMT2nASDnZHU" + "&"
+
+    private val webapiBaseUri = "https://test.core.its-mo.com/zmaps/api/apicore/core/v1_0/"
+    private val jsapiBaseUri = "https://test.api.its-mo.com/v3/"
+
     fun search_goal(searchWord: String?): PoiWord {
         val nameAPI = "poi/word"
         val paramAPI = mapOf(
@@ -20,16 +29,31 @@ class ItsumoNaviApiClient() {
         return response["api_response"] as PoiWord
     }
 
+    fun make_signature_hmac(http_method: String, parameter: MutableMap<String, String>, uri: String, secret: String) : MutableMap<String, String>{
+        val encodedParams = parameter.toList().sortedBy { it.first }
+            .joinToString("&") { "${it.first}=${URLEncoder.encode(it.second, "UTF-8")}" }
+        val base_string = "$http_method&${URLEncoder.encode(uri, "UTF-8")}&${URLEncoder.encode(encodedParams, "UTF-8")}"
+        val mac = Mac.getInstance("HmacSHA1")
+        val secretKeySpec = SecretKeySpec(secret.toByteArray(), "HmacSHA1")
+
+        mac.init(secretKeySpec)
+        val signature = mac.doFinal(base_string.toByteArray())
+        val signature_decoded = Base64.getEncoder().encodeToString(signature)
+        parameter["oauth_signature"] = signature_decoded
+
+        return parameter
+    }
+
     fun itumonavi_api_gateway(nameAPI: String, paramAPI: Map<String, String>): Map<String, Any> {
 
         val time = System.currentTimeMillis() / 1000
         val randomname = (1..10).map { ('a'..'z').random() }.joinToString("")
 
         val http_method = "GET"
-        val parameter = mutableMapOf(
-            "if_clientid" to "JSZ22f5fd2f67d9|2UcW0",
+        var parameter = mutableMapOf(
+            "if_clientid" to consumer_key,
             "if_auth_type" to "oauth",
-            "oauth_consumer_key" to "JSZ22f5fd2f67d9|2UcW0",
+            "oauth_consumer_key" to consumer_key,
             "oauth_signature_method" to "HMAC-SHA1",
             "oauth_timestamp" to time.toString(),
             "oauth_nonce" to randomname,
@@ -37,25 +61,9 @@ class ItsumoNaviApiClient() {
         )
         parameter += paramAPI
 
-        val secret = "5th-fmKSlNWGvB_cMT2nASDnZHU" + "&"
+        val uri = webapiBaseUri + nameAPI
 
-        val baseURI = "https://test.core.its-mo.com/zmaps/api/apicore/core/v1_0/"
-        val uri = baseURI + nameAPI
-
-        fun make_signature_hmac(http_method: String, parameter: MutableMap<String, String>, uri: String, secret: String) {
-            val encodedParams = parameter.toList().sortedBy { it.first }
-                .joinToString("&") { "${it.first}=${URLEncoder.encode(it.second, "UTF-8")}" }
-            val base_string = "$http_method&${URLEncoder.encode(uri, "UTF-8")}&${URLEncoder.encode(encodedParams, "UTF-8")}"
-            val mac = Mac.getInstance("HmacSHA1")
-            val secretKeySpec = SecretKeySpec(secret.toByteArray(), "HmacSHA1")
-
-            mac.init(secretKeySpec)
-            val signature = mac.doFinal(base_string.toByteArray())
-            val signature_decoded = Base64.getEncoder().encodeToString(signature)
-            parameter["oauth_signature"] = signature_decoded
-        }
-
-        make_signature_hmac(http_method, parameter, uri, secret)
+        parameter = make_signature_hmac(http_method, parameter, uri, secret)
 
         val url = "$uri?${parameter.toList().sortedBy { it.first }
             .joinToString("&") { "${it.first}=${URLEncoder.encode(it.second, "UTF-8")}" }}"
@@ -88,6 +96,67 @@ class ItsumoNaviApiClient() {
         return response
     }
 
+    @JavascriptInterface
+    fun gen_itumonavi_JSAPI_loader_url(): String {
+
+        val time = System.currentTimeMillis() / 1000
+        val randomname = (1..10).map { ('a'..'z').random() }.joinToString("")
+
+        val http_method = "GET"
+        var parameter = mutableMapOf(
+            "key" to consumer_key,
+            "auth_type" to "oauth",
+            "oauth_consumer_key" to consumer_key,
+            "oauth_signature_method" to "HMAC-SHA1",
+            "oauth_timestamp" to time.toString(),
+            "oauth_nonce" to randomname,
+            "oauth_version" to "1.0",
+            "api" to "zdcmap.js,control.js,search.js,shape.js",
+            "enc" to "UTF8"
+        )
+
+        val apiName = "loader"
+        val uri = jsapiBaseUri + apiName
+
+        parameter = make_signature_hmac(http_method, parameter, uri, secret)
+
+        val url = "$uri?${parameter.toList().sortedBy { it.first }
+            .joinToString("&") { "${it.first}=${URLEncoder.encode(it.second, "UTF-8")}" }}"
+
+        return url
+    }
+    inner class ItsumoNaviApiClientJS(val pointFrom:Point, val pointTo:Point) {
+        @JavascriptInterface
+        fun gen_itumonavi_JSAPI_route3_params(): String {
+
+            val time = System.currentTimeMillis() / 1000
+            val randomname = (1..10).map { ('a'..'z').random() }.joinToString("")
+
+            val http_method = "GET"
+            var parameter = mutableMapOf(
+                "if_clientid" to consumer_key,
+                "if_auth_type" to "oauth",
+                "oauth_consumer_key" to consumer_key,
+                "oauth_signature_method" to "HMAC-SHA1",
+                "oauth_timestamp" to time.toString(),
+                "oauth_nonce" to randomname,
+                "oauth_version" to "1.0",
+                "from" to pointFrom.lat.toString() + "," + pointFrom.lon.toString(),
+                "to" to pointTo.lat.toString() + "," + pointTo.lon.toString(),
+                "searchType" to "0",
+            )
+
+            val apiName = "route3/drive"
+            val uri = webapiBaseUri + apiName
+
+            parameter = make_signature_hmac(http_method, parameter, uri, secret)
+
+            val jsonString: String = Gson().toJson(parameter)
+            val params = parameter.toList().joinToString(",") { "${it.first}:'${it.second}'" }
+
+            return jsonString
+        }
+    }
 //    private fun itumonavi_api(searchWord: String) {
 //
 //        var nameAPI: String
